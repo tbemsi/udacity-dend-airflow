@@ -1,10 +1,14 @@
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
+from airflow.contrib.hooks.aws_hook import AwsHook
 
 class LoadFactOperator(BaseOperator):
 
     ui_color = '#F98866'
+    copy_sql = """
+        {}
+    """
 
     @apply_defaults
     def __init__(self,
@@ -29,10 +33,6 @@ class LoadFactOperator(BaseOperator):
         
         self.log.info("Upserting data to Redshift")
         formatted_sql = LoadFactOperator.copy_sql.format(
-            self.sql_query, 
-            credentials.access_key, 
-            credentials.secret_key, 
-            self.ignore_headers, 
-            self.delimiter
+            self.sql_query
         )
         redshift.run(formatted_sql)
